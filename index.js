@@ -514,9 +514,9 @@ app.get("/file", async (req, res) => {
   }
 });
 app.get("/videosync", async (req, res) => {
-  const filePath = req.query.path;
-  if (!filePath) {
-    return res.status(400).send("VideoSync: File path not specified.");
+  const fileUrl = req.query.url;
+  if (!fileUrl) {
+    return res.status(400).send("VideoSync: File url not specified.");
   }
   const html = `
     <!DOCTYPE html>
@@ -572,7 +572,7 @@ app.get("/videosync", async (req, res) => {
           setTimeout(() => {
             const queryStringVideoUrl = new URLSearchParams(window.location.search)
               .get("url")
-              .trim() || "${encodeURIComponent(filePath)}";
+              .trim() || "${encodeURIComponent(fileUrl)}";
             if (queryStringVideoUrl) {
               videoUrl.value = queryStringVideoUrl;
               video.src = queryStringVideoUrl;

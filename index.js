@@ -359,7 +359,7 @@ app.get("/", async (req, res) => {
       } else {
         html += `
           <tr>
-            <td style="display: flex; justify-content: start; align-items: center;">
+            <td style="display: flex; justify-content: start; align-items: center; gap: 0.5rem;">
               <a class="file-icon" href="/file?path=${encodeURIComponent(
                 item.path,
               )}">

@@ -338,7 +338,7 @@ app.get("/", async (req, res) => {
       } else {
         html += `
           <tr>
-            <td>
+            <td style="display: flex; justify-content: start; align-items: center;">
               <a class="file-icon" href="/file?path=${encodeURIComponent(
                 item.path,
               )}">
@@ -347,7 +347,7 @@ app.get("/", async (req, res) => {
               ${
                 item.name.toLowerCase().match(/\.(mp4|mkv|mp3)$/)
                   ? `
-                    <a href="/videosync?url=${encodeURIComponent(item.path)}">
+                    <a href="/videosync?path=${encodeURIComponent(item.path)}">
                       Play
                     </a>
                   `
@@ -493,9 +493,9 @@ app.get("/file", async (req, res) => {
   }
 });
 app.get("/videosync", async (req, res) => {
-  const url = req.query.url;
-  if (!url) {
-    return res.status(400).send("File url not specified.");
+  const ftpPath = req.query.path;
+  if (!ftpPath) {
+    return res.status(400).send("VideoSync: File path not specified.");
   }
   const html = `
     <!DOCTYPE html>
@@ -551,7 +551,7 @@ app.get("/videosync", async (req, res) => {
           setTimeout(() => {
             const queryStringVideoUrl = new URLSearchParams(window.location.search)
               .get("url")
-              .trim() || "${encodeURIComponent(url)}";
+              .trim() || "${encodeURIComponent(ftpPath)}";
             if (queryStringVideoUrl) {
               videoUrl.value = queryStringVideoUrl;
               video.src = queryStringVideoUrl;

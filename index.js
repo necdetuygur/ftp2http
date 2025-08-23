@@ -359,21 +359,23 @@ app.get("/", async (req, res) => {
       } else {
         html += `
           <tr>
-            <td style="display: flex; justify-content: start; align-items: center; gap: 0.5rem;">
-              <a class="file-icon" href="/file?path=${encodeURIComponent(
-                item.path,
-              )}">
-                ${item.name}
-              </a>
-              ${
-                item.name.toLowerCase().match(/\.(mp4|mkv|mp3)$/)
-                  ? `
-                    <a href="/videosync?path=${encodeURIComponent(item.path)}">
-                      Play
-                    </a>
-                  `
-                  : ""
-              }
+            <td>
+              <div style="display: flex; justify-content: start; align-items: center; gap: 0.5rem;">
+                <a class="file-icon" href="/file?path=${encodeURIComponent(
+                  item.path,
+                )}">
+                  ${item.name}
+                </a>
+                ${
+                  item.name.toLowerCase().match(/\.(mp4|mkv|mp3)$/)
+                    ? `
+                      <a href="/videosync?url=${encodeURIComponent(item.path)}">
+                        Play
+                      </a>
+                    `
+                    : ""
+                }
+              </div>
             </td>
             <td>${itemSize}</td>
             <td>${itemDate}</td>
@@ -547,7 +549,7 @@ app.get("/videosync", async (req, res) => {
         </style>
       </head>
       <body>
-        <form action="." class="controls">
+        <form action="./videosync" class="controls">
           <label for="videoUrl">Video URL</label>
           <input
             name="url"
@@ -570,10 +572,14 @@ app.get("/videosync", async (req, res) => {
           const videoUrl = document.getElementById("videoUrl");
           const speedInput = document.getElementById("speedInput");
           setTimeout(() => {
-            const queryStringVideoUrl = new URLSearchParams(window.location.search)
+            let queryStringVideoUrl = new URLSearchParams(window.location.search)
               .get("url")
               .trim() || "${encodeURIComponent(fileUrl)}";
             if (queryStringVideoUrl) {
+              const isHttp = queryStringVideoUrl.indexOf("http") > -1;
+              if(!isHttp){
+                queryStringVideoUrl = window.top.location.protocol + "//" + window.top.location.host + "/file?path=" + queryStringVideoUrl;
+              }
               videoUrl.value = queryStringVideoUrl;
               video.src = queryStringVideoUrl;
               sendData();

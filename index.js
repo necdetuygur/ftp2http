@@ -106,7 +106,6 @@ async function getFTPListing(ftpPath = "/") {
     }
   }
 }
-// Natural sort comparison function for strings with numbers
 function naturalSort(a, b) {
   const collator = new Intl.Collator(undefined, {
     numeric: true,
@@ -339,9 +338,22 @@ app.get("/", async (req, res) => {
       } else {
         html += `
           <tr>
-            <td><a class="file-icon" href="/file?path=${encodeURIComponent(
-              item.path,
-            )}">${item.name}</a></td>
+            <td>
+              <a class="file-icon" href="/file?path=${encodeURIComponent(
+                item.path,
+              )}">
+                ${item.name}
+              </a>
+              ${
+                item.name.toLowerCase().match(/\.(mp4|mkv|mp3)$/)
+                  ? `
+                    <a href="/videosync?url=${encodeURIComponent(item.path)}">
+                      Play
+                    </a>
+                  `
+                  : ""
+              }
+            </td>
             <td>${itemSize}</td>
             <td>${itemDate}</td>
           </tr>
@@ -479,6 +491,107 @@ app.get("/file", async (req, res) => {
       client = null;
     }
   }
+});
+app.get("/videosync", async (req, res) => {
+  const ftpPath = req.query.path;
+  if (!ftpPath) {
+    return res.status(400).send("File path not specified.");
+  }
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>VideoSync</title>
+        <script src="/socket.io/socket.io.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+          @import url("https://fonts.googleapis.com/css2?family=Fira+Sans+Extra+Condensed:wght@400;700&display=swap");
+          body {
+            font-family: "Fira Sans Extra Condensed", Arial, Helvetica, sans-serif !important;
+            margin: 0;
+            padding: 10px;
+            background-color: #112233;
+            color: #e0e0e0;
+            max-width: 100%;
+            overflow-x: hidden;
+          }
+          .controls {
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+          }
+        </style>
+      </head>
+      <body>
+        <form action="." class="controls">
+          <label for="videoUrl">Video URL</label>
+          <input
+            name="url"
+            type="text"
+            id="videoUrl"
+            placeholder="http://example.com/video.mp4"
+            style="width: 75%"
+          />
+          <button type="submit">Oynat</button>
+        </form>
+        <video id="video" style="width: 100%; max-height: 80vh" controls></video>
+        <div class="controls">
+          <label for="speedInput">Playback Speed</label>
+          <input type="number" id="speedInput" value="1.25" step="0.05" />
+          <button onclick="sendData()">Senkronize Et</button>
+        </div>
+        <script>
+          const socket = io(window.top.location.href);
+          const video = document.getElementById("video");
+          const videoUrl = document.getElementById("videoUrl");
+          const speedInput = document.getElementById("speedInput");
+          setTimeout(() => {
+            const queryStringVideoUrl = new URLSearchParams(window.location.search)
+              .get("url")
+              .trim();
+            if (queryStringVideoUrl) {
+              videoUrl.value = queryStringVideoUrl;
+              video.src = queryStringVideoUrl;
+              sendData();
+            }
+          }, 100);
+          socket.on("sync", (data) => {
+            if (data.url) video.src = data.url;
+            video.currentTime = data.time;
+            video.playbackRate = data.speed;
+            videoUrl.value = data.url;
+            speedInput.value = data.speed;
+          });
+          socket.on("update", (data) => {
+            if (data.url && video.src !== data.url) video.src = data.url;
+            video.currentTime = data.time;
+            video.playbackRate = data.speed;
+            videoUrl.value = data.url;
+            speedInput.value = data.speed;
+            if (data.paused) {
+              video.pause();
+            } else {
+              video.play();
+            }
+          });
+          function sendData() {
+            const data = {
+              url: videoUrl.value,
+              time: video.currentTime,
+              speed: parseFloat(speedInput.value),
+              paused: video.paused,
+            };
+            video.playbackRate = data.speed;
+            socket.emit("update", data);
+          }
+        </script>
+      </body>
+    </html>
+  `;
+  return res.status(200).send(html);
 });
 app.listen(PORT, () => {
   console.log(

@@ -1,5 +1,6 @@
 const express = require("express");
-const http = require("http"); // Added to create HTTP server
+const http = require("http");
+const { Server } = require("socket.io");
 const ftp = require("basic-ftp");
 const path = require("path");
 const args = process.argv.slice(2);

@@ -567,7 +567,7 @@ app.get("/videosync", async (req, res) => {
           <button onclick="sendData()">Senkronize Et</button>
         </div>
         <script>
-          const socket = io(window.top.location.href);
+          const socket = io(window.top.location.protocol + "//" + window.top.location.host);
           const video = document.getElementById("video");
           const videoUrl = document.getElementById("videoUrl");
           const speedInput = document.getElementById("speedInput");

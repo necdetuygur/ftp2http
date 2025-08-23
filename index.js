@@ -34,6 +34,25 @@ const FTP_CONFIG = {
 };
 const PORT = parseInt(portArgument, 10);
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+let currentState = {
+  url: "",
+  time: 0,
+  speed: 1,
+  paused: true,
+};
+io.on("connection", (socket) => {
+  console.log("Connected:", socket.id);
+  socket.on("update", (data) => {
+    currentState = { ...currentState, ...data };
+    socket.broadcast.emit("update", data);
+  });
+  socket.emit("sync", currentState);
+  socket.on("disconnect", () => {
+    console.log("Leaved:", socket.id);
+  });
+});
 async function createFTPClient() {
   const client = new ftp.Client();
   client.ftp.verbose = false;
@@ -593,7 +612,7 @@ app.get("/videosync", async (req, res) => {
   `;
   return res.status(200).send(html);
 });
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(
     `Connected to FTP host: ${FTP_CONFIG.user}@${FTP_CONFIG.host}:${FTP_CONFIG.port}`,
   );

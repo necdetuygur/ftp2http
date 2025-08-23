@@ -41,7 +41,7 @@ const io = new Server(server);
 let currentState = {
   url: "",
   time: 0,
-  speed: 1,
+  speed: 1.25,
   paused: true,
 };
 io.on("connection", (socket) => {
@@ -550,7 +550,7 @@ app.get("/videosync", async (req, res) => {
       </head>
       <body>
         <form action="./videosync" class="controls">
-          <label for="videoUrl">Video URL</label>
+          <label for="videoUrl">URL</label>
           <input
             name="url"
             type="text"
@@ -558,13 +558,13 @@ app.get("/videosync", async (req, res) => {
             placeholder="http://example.com/video.mp4"
             style="width: 75%"
           />
-          <button type="submit">Oynat</button>
+          <button type="submit">Play</button>
         </form>
         <video id="video" style="width: 100%; max-height: 80vh" controls></video>
         <div class="controls">
-          <label for="speedInput">Playback Speed</label>
+          <label for="speedInput">Speed</label>
           <input type="number" id="speedInput" value="1.25" step="0.05" />
-          <button onclick="sendData()">Senkronize Et</button>
+          <button onclick="sendData()">Sync Now</button>
         </div>
         <script>
           const socket = io(window.top.location.protocol + "//" + window.top.location.host);

@@ -1,6 +1,6 @@
 {
   "name": "ftp2http",
-  "version": "1.0.33",
+  "version": "1.0.34",
   "description": "CLI FTP to HTTP",
   "main": "index.js",
   "bin": {

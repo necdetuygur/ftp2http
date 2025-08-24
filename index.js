@@ -567,7 +567,8 @@ app.get("/videosync", async (req, res) => {
           <button onclick="sendData()">Sync Now</button>
         </div>
         <script>
-          const socket = io(window.top.location.protocol + "//" + window.top.location.host);
+          const addr = window.top.location.protocol + "//" + window.top.location.host;
+          const socket = io(addr);
           const video = document.getElementById("video");
           const videoUrl = document.getElementById("videoUrl");
           const speedInput = document.getElementById("speedInput");
@@ -578,7 +579,7 @@ app.get("/videosync", async (req, res) => {
             if (queryStringVideoUrl) {
               const isHttp = queryStringVideoUrl.indexOf("http") > -1;
               if(!isHttp){
-                queryStringVideoUrl = window.top.location.protocol + "//" + window.top.location.host + "/file?path=" + queryStringVideoUrl;
+                queryStringVideoUrl = addr + "/file?path=" + queryStringVideoUrl;
               }
               videoUrl.value = queryStringVideoUrl;
               video.src = queryStringVideoUrl;
@@ -594,7 +595,7 @@ app.get("/videosync", async (req, res) => {
           });
           socket.on("update", (data) => {
             if (data.url && video.src !== data.url) video.src = data.url;
-            video.currentTime = data.time;
+            video.currentTime = data.time + 1;
             video.playbackRate = data.speed;
             videoUrl.value = data.url;
             speedInput.value = data.speed;

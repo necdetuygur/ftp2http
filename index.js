@@ -595,7 +595,7 @@ app.get("/videosync", async (req, res) => {
           });
           socket.on("update", (data) => {
             if (data.url && video.src !== data.url) video.src = data.url;
-            video.currentTime = data.time + 1;
+            video.currentTime = data.time + 0.5;
             video.playbackRate = data.speed;
             videoUrl.value = data.url;
             speedInput.value = data.speed;
